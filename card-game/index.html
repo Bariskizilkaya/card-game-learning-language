@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pinyin ↔ English Match</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>汉字 · Pinyin Match</h1>
+      <p class="subtitle">Add word pairs, then drag cards to match Chinese (pinyin) with English.</p>
+    </header>
+
+    <section class="add-words">
+      <h2>Add word pair</h2>
+      <div class="input-row">
+        <input type="text" id="pinyin" placeholder="Pinyin / 汉字 (e.g. nǐ hǎo)" autocomplete="off">
+        <input type="text" id="english" placeholder="English (e.g. hello)" autocomplete="off">
+        <button type="button" id="add-btn">Add</button>
+      </div>
+
+      <h2 class="bulk-title">Bulk add — paste many pairs</h2>
+      <p class="hint bulk-hint">One pair per line. Use tab, " – ", " - ", ", ", or ": " between pinyin and English. Empty lines are skipped.</p>
+      <div class="bulk-row">
+        <textarea id="bulk-input" rows="6" placeholder="nǐ hǎo - hello&#10;xuéxi - study&#10;shū - book&#10;rén - person"></textarea>
+        <div class="bulk-actions">
+          <button type="button" id="bulk-add-btn">Add all</button>
+          <span id="bulk-feedback" class="bulk-feedback"></span>
+        </div>
+      </div>
+      <p class="hint">Words are saved in your browser. Add at least 2 pairs to play.</p>
+    </section>
+
+    <section class="word-list">
+      <h2>Your words</h2>
+      <ul id="words-ul"></ul>
+      <button type="button" id="clear-words" class="secondary">Clear all words</button>
+    </section>
+
+    <section class="game">
+      <h2>Match the cards</h2>
+      <div class="game-controls">
+        <button type="button" id="start-game">Start game</button>
+        <span id="score" class="score"></span>
+      </div>
+      <div id="game-area" class="game-area hidden">
+        <div class="column pinyin-column">
+          <h3>Pinyin / 汉字 — drag to match</h3>
+          <div id="pinyin-cards" class="cards"></div>
+        </div>
+        <div class="column english-column">
+          <h3>English — drop here</h3>
+          <div id="english-cards" class="cards"></div>
+        </div>
+      </div>
+      <p id="game-message" class="game-message"></p>
+    </section>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

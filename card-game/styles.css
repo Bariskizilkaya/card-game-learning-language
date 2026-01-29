@@ -1,0 +1,380 @@
+:root {
+  --bg: #1a1b26;
+  --surface: #24283b;
+  --card: #414868;
+  --accent: #7aa2f7;
+  --accent-dim: #565f89;
+  --success: #9ece6a;
+  --text: #c0caf5;
+  --text-dim: #a9b1d6;
+  --border: #3b4261;
+  --radius: 12px;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+.app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+  letter-spacing: 0.02em;
+}
+
+.subtitle {
+  color: var(--text-dim);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+  color: var(--text-dim);
+}
+
+.add-words {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow);
+}
+
+.input-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.input-row input {
+  flex: 1;
+  min-width: 140px;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.input-row input::placeholder {
+  color: var(--accent-dim);
+}
+
+.input-row input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+#add-btn {
+  padding: 0.6rem 1.2rem;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+#add-btn:hover {
+  filter: brightness(1.1);
+}
+
+.hint {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin: 0.75rem 0 0;
+}
+
+.bulk-title {
+  margin-top: 1.25rem;
+}
+
+.bulk-hint {
+  margin-bottom: 0.5rem;
+}
+
+.bulk-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+#bulk-input {
+  flex: 1;
+  min-height: 120px;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+#bulk-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+#bulk-input::placeholder {
+  color: var(--accent-dim);
+}
+
+#bulk-add-btn {
+  padding: 0.6rem 1.2rem;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+#bulk-add-btn:hover {
+  filter: brightness(1.1);
+}
+
+.bulk-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.bulk-feedback {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  max-width: 200px;
+}
+
+.bulk-feedback.success {
+  color: var(--success);
+}
+
+.bulk-feedback.error {
+  color: #f7768e;
+}
+
+.word-list {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow);
+}
+
+#words-ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+#words-ul li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.7rem;
+  background: var(--card);
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+#words-ul li .pair {
+  color: var(--text-dim);
+}
+
+#words-ul li button {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 0 0.25rem;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+#words-ul li button:hover {
+  color: #f7768e;
+}
+
+.secondary {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.secondary:hover {
+  border-color: var(--accent-dim);
+  color: var(--text);
+}
+
+.game {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: var(--shadow);
+}
+
+.game-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+#start-game {
+  padding: 0.6rem 1.2rem;
+  background: var(--success);
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+#start-game:hover {
+  filter: brightness(1.1);
+}
+
+#start-game:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.score {
+  font-size: 0.95rem;
+  color: var(--text-dim);
+}
+
+.game-area {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.game-area.hidden {
+  display: none;
+}
+
+.column h3 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent-dim);
+  margin: 0 0 0.75rem;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.card {
+  padding: 0.75rem 1rem;
+  background: var(--card);
+  border-radius: 8px;
+  border: 2px solid var(--border);
+  cursor: grab;
+  user-select: none;
+  font-size: 1rem;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.card:hover {
+  border-color: var(--accent-dim);
+}
+
+.card.dragging {
+  opacity: 0.6;
+  cursor: grabbing;
+  transform: scale(1.02);
+  box-shadow: var(--shadow);
+}
+
+.card.matched {
+  border-color: var(--success);
+  background: rgba(158, 206, 106, 0.15);
+  cursor: default;
+  order: 999;
+}
+
+.card.drop-target {
+  border-color: var(--accent);
+  background: rgba(122, 162, 247, 0.15);
+}
+
+.english-column .card {
+  cursor: default;
+}
+
+.english-column .card.matched {
+  cursor: default;
+}
+
+.game-message {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  min-height: 1.5em;
+}
+
+.game-message.success {
+  color: var(--success);
+}
+
+.game-message.error {
+  color: #f7768e;
+}
+
+@media (max-width: 600px) {
+  .game-area {
+    grid-template-columns: 1fr;
+  }
+
+  .input-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #add-btn {
+    width: 100%;
+  }
+}
