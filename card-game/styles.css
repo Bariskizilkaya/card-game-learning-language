@@ -185,6 +185,18 @@ h2 {
   color: #f7768e;
 }
 
+.sound-hint {
+  margin-top: 1rem;
+  font-size: 0.8rem;
+}
+
+.sound-hint code {
+  background: var(--card);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
 .word-list {
   background: var(--surface);
   border-radius: var(--radius);
@@ -254,9 +266,64 @@ h2 {
 
 .game-controls {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 1rem;
   margin-bottom: 1rem;
+}
+
+.voice-toggle-btn {
+  padding: 0.6rem 1rem;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.voice-toggle-btn:hover {
+  border-color: var(--accent-dim);
+  background: var(--surface);
+}
+
+.test-sound-btn {
+  padding: 0.6rem 1rem;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.test-sound-btn:hover {
+  filter: brightness(1.1);
+}
+
+.voice-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+}
+
+#voice-select {
+  padding: 0.5rem 0.75rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.9rem;
+  min-width: 180px;
+}
+
+#voice-select:focus {
+  outline: none;
+  border-color: var(--accent);
 }
 
 #start-game {

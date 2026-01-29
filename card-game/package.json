@@ -1,0 +1,12 @@
+{
+  "name": "pinyin-match",
+  "version": "1.0.0",
+  "description": "Pinyin–English card matching game with Google TTS",
+  "scripts": {
+    "start": "node server.js",
+    "serve": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

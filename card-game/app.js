@@ -1,6 +1,30 @@
 const STORAGE_KEY = 'pinyin-english-pairs';
+const VOICE_STORAGE_KEY = 'pinyin-match-voice';
+const VOICE_ENABLED_KEY = 'pinyin-match-voice-enabled';
 
 let words = [];
+
+function isVoiceEnabled() {
+  const raw = localStorage.getItem(VOICE_ENABLED_KEY);
+  return raw === null || raw === 'true';
+}
+
+function setVoiceEnabled(enabled) {
+  localStorage.setItem(VOICE_ENABLED_KEY, String(enabled));
+  updateVoiceToggleButton();
+}
+
+function updateVoiceToggleButton() {
+  const btn = document.getElementById('voice-toggle');
+  if (!btn) return;
+  if (isVoiceEnabled()) {
+    btn.textContent = '🔊 Voice on';
+    btn.title = 'Click to disable pronunciation';
+  } else {
+    btn.textContent = '🔇 Voice off';
+    btn.title = 'Click to enable pronunciation';
+  }
+}
 
 function loadWords() {
   try {
@@ -121,6 +145,198 @@ document.getElementById('clear-words').addEventListener('click', () => {
   }
 });
 
+// Strip pinyin tone marks so en-US TTS can read it (e.g. "nǐ hǎo" -> "ni hao")
+function pinyinToReadable(str) {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/ü/g, 'u');
+}
+
+// Prefer a female voice (by common OS/browser voice names)
+function isLikelyFemaleVoice(voice) {
+  const n = (voice.name || '').toLowerCase();
+  const femaleHints = ['female', 'woman', 'zira', 'samantha', 'victoria', 'karen', 'kate', 'moira', 'tessa', 'xiaoxiao', 'xiaoyi', 'huihui', 'yaoyao', 'mei-jia', 'hazel', 'susan', 'linda', '女'];
+  return femaleHints.some((h) => n.includes(h));
+}
+
+// Prefer higher-quality voices (natural, neural, online)
+function isBetterQualityVoice(voice) {
+  const n = (voice.name || '').toLowerCase();
+  return /natural|neural|online|premium|enhanced/.test(n);
+}
+
+function pickFemaleVoice(voices, langPrefix) {
+  const filtered = langPrefix
+    ? voices.filter((v) => v.lang.startsWith(langPrefix))
+    : voices;
+  const better = filtered.filter((v) => isLikelyFemaleVoice(v) && isBetterQualityVoice(v));
+  const female = (better.length ? better : filtered.filter(isLikelyFemaleVoice))[0] || filtered[0];
+  return female || filtered[0];
+}
+
+let voicesReady = false;
+function ensureVoices() {
+  if (voicesReady) return;
+  if (speechSynthesis.getVoices().length > 0) {
+    voicesReady = true;
+    populateVoiceSelect();
+    return;
+  }
+  speechSynthesis.onvoiceschanged = () => {
+    voicesReady = true;
+    populateVoiceSelect();
+  };
+}
+
+function populateVoiceSelect() {
+  const voices = speechSynthesis.getVoices();
+  const sel = document.getElementById('voice-select');
+  if (!sel || voices.length === 0) return;
+  const saved = localStorage.getItem(VOICE_STORAGE_KEY);
+  const currentValue = sel.value;
+  sel.innerHTML = '<option value="">Auto (Chinese / best female)</option>';
+  const zh = voices.filter((v) => v.lang.startsWith('zh'));
+  const en = voices.filter((v) => v.lang.startsWith('en'));
+  const optgroupZh = document.createElement('optgroup');
+  optgroupZh.label = 'Chinese (Mandarin) — use for pinyin';
+  zh.forEach((v) => {
+    const opt = document.createElement('option');
+    opt.value = v.name;
+    opt.textContent = `${v.name} (${v.lang})`;
+    optgroupZh.appendChild(opt);
+  });
+  sel.appendChild(optgroupZh);
+  const optgroupEn = document.createElement('optgroup');
+  optgroupEn.label = 'English (fallback only)';
+  en.forEach((v) => {
+    const opt = document.createElement('option');
+    opt.value = v.name;
+    opt.textContent = `${v.name} (${v.lang})`;
+    optgroupEn.appendChild(opt);
+  });
+  sel.appendChild(optgroupEn);
+  if (zh.length === 0 && en.length > 0) {
+    const other = voices.filter((v) => !v.lang.startsWith('zh') && !v.lang.startsWith('en'));
+    if (other.length) {
+      const og = document.createElement('optgroup');
+      og.label = 'Other';
+      other.forEach((v) => {
+        const opt = document.createElement('option');
+        opt.value = v.name;
+        opt.textContent = `${v.name} (${v.lang})`;
+        og.appendChild(opt);
+      });
+      sel.appendChild(og);
+    }
+  }
+  if (saved && voices.some((v) => v.name === saved)) sel.value = saved;
+  else if (currentValue && voices.some((v) => v.name === currentValue)) sel.value = currentValue;
+}
+
+function getSelectedVoice(voices) {
+  const sel = document.getElementById('voice-select');
+  const name = (sel && sel.value) || localStorage.getItem(VOICE_STORAGE_KEY);
+  if (!name) return null;
+  return voices.find((v) => v.name === name) || null;
+}
+
+function showNoChineseVoiceHint() {
+  const msg = document.getElementById('game-message');
+  if (!msg) return;
+  msg.textContent = 'No Chinese voice found — install one for Mandarin pronunciation (e.g. Microsoft Huihui: Settings → Time & language → Speech).';
+  msg.className = 'game-message error';
+  setTimeout(() => {
+    msg.textContent = '';
+    msg.className = 'game-message';
+  }, 6000);
+}
+
+let googleAudio = null;
+function speakViaGoogle(text) {
+  return fetch('/api/speak', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: text.trim() }),
+  }).then((res) => {
+    if (!res.ok) throw new Error(res.status);
+    return res.arrayBuffer();
+  }).then((buf) => {
+    if (googleAudio) {
+      googleAudio.pause();
+      googleAudio.src = '';
+    }
+    const blob = new Blob([buf], { type: 'audio/mpeg' });
+    const url = URL.createObjectURL(blob);
+    googleAudio = new Audio(url);
+    return new Promise((resolve, reject) => {
+      googleAudio.onended = () => {
+        URL.revokeObjectURL(url);
+        resolve();
+      };
+      googleAudio.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error('Playback failed'));
+      };
+      googleAudio.play().then(resolve).catch(reject);
+    });
+  });
+}
+
+function speakPinyin(pinyin) {
+  if (!isVoiceEnabled()) return;
+  if (!pinyin) return;
+  const textToSpeak = pinyin.trim();
+  if (!textToSpeak) return;
+
+  speakViaGoogle(textToSpeak).catch(() => {
+    if (typeof speechSynthesis === 'undefined') return;
+    ensureVoices();
+    speechSynthesis.cancel();
+    setTimeout(() => {
+    const voices = speechSynthesis.getVoices();
+    const selected = getSelectedVoice(voices);
+    const zhVoices = voices.filter((v) => v.lang.startsWith('zh'));
+    const u = new SpeechSynthesisUtterance();
+    u.rate = 0.6;
+    u.volume = 1;
+    u.pitch = 1;
+    if (selected) {
+      u.voice = selected;
+      u.lang = selected.lang || (selected.lang.startsWith('zh') ? 'zh-CN' : 'en-US');
+      u.text = selected.lang.startsWith('zh') ? textToSpeak : pinyinToReadable(textToSpeak);
+      if (!selected.lang.startsWith('zh') && zhVoices.length > 0) {
+        showNoChineseVoiceHint();
+      }
+    } else {
+      const zhFemale = pickFemaleVoice(voices, 'zh');
+      const zhAny = zhVoices[0];
+      if (zhFemale) {
+        u.lang = zhFemale.lang || 'zh-CN';
+        u.text = textToSpeak;
+        u.voice = zhFemale;
+      } else if (zhAny) {
+        u.lang = zhAny.lang || 'zh-CN';
+        u.text = textToSpeak;
+        u.voice = zhAny;
+      } else {
+        const enFemale = pickFemaleVoice(voices, 'en');
+        if (enFemale) {
+          u.lang = enFemale.lang || 'en-US';
+          u.text = pinyinToReadable(textToSpeak);
+          u.voice = enFemale;
+        } else {
+          u.lang = 'en-US';
+          u.text = pinyinToReadable(textToSpeak);
+        }
+        showNoChineseVoiceHint();
+      }
+    }
+    speechSynthesis.speak(u);
+  }, 50);
+  });
+}
+
 function shuffle(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -156,11 +372,15 @@ function startGame() {
     pinyinCard.draggable = true;
     pinyinCard.id = `pinyin-${id}`;
 
+    pinyinCard.addEventListener('click', () => {
+      if (!pinyinCard.classList.contains('matched')) speakPinyin(pinyin);
+    });
     pinyinCard.addEventListener('dragstart', (e) => {
       if (pinyinCard.classList.contains('matched')) {
         e.preventDefault();
         return;
       }
+      speakPinyin(pinyin);
       e.dataTransfer.setData('text/plain', id);
       e.dataTransfer.effectAllowed = 'move';
       pinyinCard.classList.add('dragging');
@@ -219,5 +439,27 @@ function updateScore() {
 
 document.getElementById('start-game').addEventListener('click', startGame);
 
+document.getElementById('test-sound').addEventListener('click', () => {
+  if (!isVoiceEnabled()) return;
+  ensureVoices();
+  populateVoiceSelect();
+  speakPinyin('nǐ hǎo');
+});
+
+document.getElementById('voice-toggle').addEventListener('click', () => {
+  setVoiceEnabled(!isVoiceEnabled());
+});
+
+const voiceSelectEl = document.getElementById('voice-select');
+if (voiceSelectEl) {
+  voiceSelectEl.addEventListener('change', () => {
+    const val = voiceSelectEl.value;
+    if (val) localStorage.setItem(VOICE_STORAGE_KEY, val);
+    else localStorage.removeItem(VOICE_STORAGE_KEY);
+  });
+}
+
 loadWords();
 renderWordList();
+updateVoiceToggleButton();
+if (typeof speechSynthesis !== 'undefined') populateVoiceSelect();

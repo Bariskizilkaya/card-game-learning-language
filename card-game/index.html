@@ -43,6 +43,14 @@
       <h2>Match the cards</h2>
       <div class="game-controls">
         <button type="button" id="start-game">Start game</button>
+        <button type="button" id="voice-toggle" class="voice-toggle-btn" title="Toggle pronunciation">🔊 Voice on</button>
+        <button type="button" id="test-sound" class="test-sound-btn" title="Test pronunciation">🔊 Test sound</button>
+        <label class="voice-label">
+          Voice
+          <select id="voice-select" title="Pick the voice for pinyin">
+            <option value="">Auto (best female)</option>
+          </select>
+        </label>
         <span id="score" class="score"></span>
       </div>
       <div id="game-area" class="game-area hidden">
@@ -56,6 +64,7 @@
         </div>
       </div>
       <p id="game-message" class="game-message"></p>
+      <p class="hint sound-hint"><strong>Google TTS:</strong> Run <code>GOOGLE_TTS_API_KEY=your-key node server.js</code> then open <code>http://localhost:3000</code> for Mandarin pronunciation. Otherwise the app uses your browser’s voices (pick a Chinese voice in the dropdown).</p>
     </section>
   </div>
   <script src="app.js"></script>
